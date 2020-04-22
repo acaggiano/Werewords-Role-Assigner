@@ -1,0 +1,93 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    background-color: #0A1128;
+    color: #EFCB68;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#app {
+    padding: 30px 20px;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+#app > * {
+    width: 100%;
+}
+
+h1, h2, h3{
+    
+    font-family: 'Averia Serif Libre';
+    text-shadow: 0px 4px 4px #2274A5;
+    
+}
+
+h1 {
+flex: auto;
+font-size: 48px;
+}
+
+h2 {
+    margin-bottom: 15px;
+    font-size: 32px;
+}
+
+main {
+    flex: 2;
+}
+
+input, button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 15px;
+    width: 411px;
+    min-width: 30%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 24px
+}
+
+input[type="submit"], button {
+    border-radius: 5px;
+    background-color: #2274A5;
+    outline: none;
+    border: 0;
+    cursor: pointer;
+    color: #EFCB68;
+}
+
+input[type="submit"]:hover, button:hover {
+    background-color: #185483;
+}
+
+p {
+    margin: 0 10px;
+}
+
+#role {
+    font-size: 1.25em;
+    font-weight: bold;
+}
+
+#users {
+    flex: 3;
+}
+
+.nametag {
+    color: #2274A5;
+    font-size: small;
+}
+
+@media (max-width: 767.98px) {
+    input, button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Werewords Role Assigner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+
+</head>
+<body>
+    <div id="app">
+        <h1>Werewords Role Assigner</h1>
+        
+        <main>
+          
+          <div v-if="!joined">
+            <form>
+              <input type="text" id="name" placeholder="Enter Your Name" required/>
+              <input type="submit" @click="joinRoom" />
+            </form>
+          </div>
+          <div v-else>
+            
+            <h2>Welcome [[ casualUsername ]]!</h2>
+            <p id="role">[[ message ]]</p>
+            <div id="admin" v-if="admin">
+              <div id="instructions" v-if="role == ''">
+                <p>You are in charge!</p>
+                <p>Once all of the players have joined press the "Assign Roles" button!</p>
+              </div>
+              <button v-if="usernames.length > 1" @click="assignRoles">Assign Roles</button>
+            </div>
+            <p v-if="!admin && role == ''">Waiting for admin to assign roles</p>
+            
+          </div>
+          <p>[[ error ]]</p>
+        </main>
+        <section id="users">
+          <p>Connected Users: [[ usernames.length ]]</p>
+          <ul>
+            <li v-for="user in usernames"> <span v-html="displayUsername(user)"></span></li>
+          </ul>
+        </section>
+        
+
+
+        
+    </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-socket.io@3.0.7/dist/vue-socketio.min.js"></script>
+  <script type="text/javascript">
+
+    new Vue({
+        el: '#app',
+        delimiters: ['[[',']]'],
+        data: {
+            message: '',
+            secret: '',
+            username: '',
+            role: '',
+            admin: false,
+            joined: false,
+            usernames: [],
+            socket: io.connect('http://' + document.domain + ':' + location.port),
+            error: '',
+        },
+        methods: {
+            joinRoom: function( e ) {
+                e.preventDefault();
+                let nameInput = document.getElementById('name').value
+
+                if(this.usernames.length == 10) {
+                  this.error = "Sorry, the room is full!"
+                }
+                else if (this.validUsername(nameInput)) {
+                  this.error = ''
+                  this.socket.emit( 'join', {
+                      message: 'User Connected',
+                      username: document.getElementById('name').value,
+                  },
+                  'werewords' )
+                  
+                  if(this.usernames.length == 0)
+                    this.admin = true
+                  
+                  this.joined = true
+                }
+                else {
+                  this.error = "Please Enter a Valid Name"
+                }
+                
+            },
+            assignRoles: function() {
+              this.socket.emit('assign')
+            },
+            displayUsername: function(username) {
+              return username.slice(0, -5) + '<span class\="nametag">' + username.slice(-5, username.length) + '</span>'
+            },
+            validUsername: function(userInput) {
+              let re = /^[a-zA-Z0-9]*$/
+
+              return re.test(userInput) && userInput != ''
+            }
+        },
+        mounted() {
+          let vm = this
+
+          this.socket.on( 'set username', function(data) {
+            vm.username = data['username']
+            console.log(`ONLY ${data['username']} SHOULD GET THIS`)
+          })
+
+          this.socket.on( 'update users', function(data) {
+            console.log(data['user_list'])
+            vm.usernames = data['user_list']
+          })
+
+          this.socket.on('role response', function(data) {
+            for(let [key, value] of Object.entries(data)) {
+                if(key == vm.username){
+                  vm.role = value
+                  vm.message = `Your role is "${value}"!`
+                }
+            }
+          })
+
+        },
+
+        computed: {
+          casualUsername: function() {
+            return this.username.slice(0, -5)
+          }
+        }
+     
+    })
+
+    
+  </script>
+
+</body>
+</html>
